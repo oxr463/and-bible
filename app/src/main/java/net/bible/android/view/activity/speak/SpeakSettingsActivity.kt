@@ -64,6 +64,7 @@ class SpeakSettingsActivity : AbstractSpeakActivity() {
         else {
             restoreSettingsFromBookmarks.isEnabled = true
         }
+        multiTranslation.isChecked = settings.multiTranslation
     }
 
     fun onEventMainThread(ev: SpeakSettingsChangedEvent) {
@@ -78,6 +79,7 @@ class SpeakSettingsActivity : AbstractSpeakActivity() {
             sleepTimer = currentSettings.sleepTimer
             lastSleepTimer = currentSettings.lastSleepTimer
         }
+        settings.multiTranslation = multiTranslation.isChecked
         settings.synchronize = synchronize.isChecked
         settings.autoBookmark = autoBookmark.isChecked
         settings.replaceDivineName = replaceDivineName.isChecked

@@ -210,7 +210,14 @@ class BibleSpeakTextProvider(private val swordContentFacade: SwordContentFacade,
                 cmds.add(SilenceCommand())
             }
         }
-        cmds.addAll(getSpeakCommandsForVerse(verse))
+        if(settings.multiTranslation && currentBooks.size > 1) {
+            for (b in currentBooks) {
+                cmds.add(ChangeLanguageCommand(Locale(b.language.code)))
+                cmds.addAll(getSpeakCommandsForVerse(verse, b))
+            }
+        } else {
+            cmds.addAll(getSpeakCommandsForVerse(verse))
+        }
         return cmds
     }
 
@@ -245,24 +252,28 @@ class BibleSpeakTextProvider(private val swordContentFacade: SwordContentFacade,
 
         cmds.addAll(getCommandsForVerse(endVerse, verse))
 
-        // If verse does not end in period, add the part before period to the current reading
-        val rest = SpeakCommandArray()
+        if(!(settings.multiTranslation && currentBooks.size > 1)) {
+            // If verse does not end in period, add the part before period to the current reading
+            val rest = SpeakCommandArray()
 
-        while (!cmds.endsSentence) {
-            val nextVerse = getNextVerse(verse)
-            val nextCommands = getCommandsForVerse(verse, nextVerse)
+            while (!cmds.endsSentence) {
+                val nextVerse = getNextVerse(verse)
+                val nextCommands = getCommandsForVerse(verse, nextVerse)
 
-            cmds.addUntilSentenceBreak(nextCommands, rest)
-            verse = nextVerse
+                cmds.addUntilSentenceBreak(nextCommands, rest)
+                verse = nextVerse
+            }
+
+            currentVerse = if (rest.isNotEmpty()) {
+                readList.addAll(rest)
+                verse
+            } else {
+                getNextVerse(verse)
+            }
         }
-
-        currentVerse = if (rest.isNotEmpty()) {
-            readList.addAll(rest)
-            verse
-        } else {
-            getNextVerse(verse)
+        else {
+            currentVerse = getNextVerse(verse)
         }
-
         endVerse = verse
 
         return cmds

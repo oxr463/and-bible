@@ -89,6 +89,7 @@ data class SpeakSettings(@Optional var synchronize: Boolean = true,
                          @Optional var playbackSettings: PlaybackSettings = PlaybackSettings(),
                          @Optional var sleepTimer: Int = 0,
                          @Optional var lastSleepTimer: Int = 10,
+                         @Optional var multiTranslation: Boolean = false,
                          // General book speak settings
                          @Optional var queue: Boolean = true,
                          @Optional var repeat: Boolean = false,
