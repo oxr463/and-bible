@@ -17,7 +17,7 @@
 		<item name="actionBarWidgetTheme">@style/Theme.AppCompat.Light</item>
 		<item name="transportButtonColor">#ffffff</item>
 		<item name="windowButtonStrokeColor">#80FFFFFF</item>
-		<item name="windowButtonBackgroundColor">#886e6e6e</item>
+		<item name="windowButtonBackgroundColor">#B78D8D8D</item>
 		<item name="speakTransportBackground">#FFFFFF</item>
 		<item name="transportBarHeight">75dp</item>
 	</style>
@@ -56,11 +56,13 @@
 		<item name="windowActionBar">false</item>
 		<item name="windowNoTitle">true</item>
 		<item name="windowActionModeOverlay">true</item>
+		<item name="actionBarSize">@dimen/toolbar_height</item>
 	</style>
 	<style name="MainBibleViewNightTheme" parent="AppThemeNight">
 		<item name="windowActionBar">false</item>
 		<item name="windowNoTitle">true</item>
 		<item name="windowActionModeOverlay">true</item>
+		<item name="actionBarSize">@dimen/toolbar_height</item>
 	</style>
 
 	<style name="NavigationViewTextStyle">

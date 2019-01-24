@@ -132,7 +132,7 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
             } else {
                 false
             }
-            return if (isPortrait && bottomNavBarVisible && !isFullScreen && !multiWinMode) navigationBarHeight else 0.0F
+            return if (isPortrait && bottomNavBarVisible && !isFullScreen && !multiWinMode) navigationBarHeight -2 else 0.0F
         }
     // Bottom offset with navigation bar and transport bar
     val bottomOffset2 get() = bottomOffset1 + if(transportBarVisible) transportBarHeight else 0.0F
@@ -181,7 +181,7 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
         updateToolbar()
 
         val tv = TypedValue()
-        if(theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+        if(theme.resolveAttribute(R.attr.actionBarSize, tv, true)) {
             actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, resources.displayMetrics).toFloat()
         }
 
@@ -229,8 +229,7 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
     }
 
     override fun onPause() {
-        if(isFullScreen)
-            toggleFullScreen()
+        fullScreen = false;
         super.onPause()
     }
 
@@ -310,6 +309,9 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
                 }
             }
         }
+        val morphItem = menu.findItem(R.id.morphologyOption)
+        val strongsItem = menu.findItem(R.id.showStrongsOption)
+        morphItem.isEnabled = strongsItem.isChecked
         return true
     }
 
@@ -324,6 +326,8 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
         val prefNamePair = gerPreferenceOptions(item.itemId)
         if(prefNamePair != null) {
             handlePrefItem(prefNamePair.name, item, prefNamePair.default)
+            if(item.itemId == R.id.showStrongsOption)
+                invalidateOptionsMenu()
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -361,44 +365,62 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
         val suggestedDictionary = documentControl.suggestedDictionary
 
         var visibleButtonCount = 0
-        val screenWidth = mainBibleView.width
+        val screenWidth = resources.displayMetrics.widthPixels
         val approximateSize = 53 * resources.displayMetrics.density
         val maxWidth = (screenWidth * 0.5).roundToInt()
         val maxButtons: Int = (maxWidth / approximateSize).toInt()
-
-        bibleButton.visibility = if(visibleButtonCount < maxButtons && suggestedBible != null) {
+        bibleButton.visibility = if (visibleButtonCount < maxButtons && suggestedBible != null) {
             bibleButton.text = titleSplitter.shorten(suggestedBible.abbreviation, actionButtonMaxChars)
             bibleButton.setOnLongClickListener { menuForDocs(it, documentControl.biblesForVerse) }
             visibleButtonCount += 1
             View.VISIBLE
         } else View.GONE
 
-        commentaryButton.visibility = if(suggestedCommentary != null && visibleButtonCount < maxButtons) {
+        commentaryButton.visibility = if (suggestedCommentary != null && visibleButtonCount < maxButtons) {
             commentaryButton.text = titleSplitter.shorten(suggestedCommentary.abbreviation, actionButtonMaxChars)
             commentaryButton.setOnLongClickListener { menuForDocs(it, documentControl.commentariesForVerse) }
             visibleButtonCount += 1
             View.VISIBLE
         } else View.GONE
 
-        strongsButton.visibility = if(visibleButtonCount< maxButtons && documentControl.isStrongsInBook) {
+        strongsButton.visibility = if (visibleButtonCount < maxButtons && documentControl.isStrongsInBook) {
             visibleButtonCount += 1
             View.VISIBLE
         } else View.GONE
 
-        searchButton.visibility = if(visibleButtonCount< maxButtons) {
-            visibleButtonCount += 1
-            View.VISIBLE
-        } else View.GONE
 
-        speakButton.visibility = if(visibleButtonCount< maxButtons && speakControl.isStopped) {
-            visibleButtonCount += 1
-            View.VISIBLE
-        } else View.GONE
+        fun addSearch() {
+            searchButton.visibility = if (visibleButtonCount < maxButtons) {
+                visibleButtonCount += 1
+                View.VISIBLE
+            } else View.GONE
+        }
+        fun addSpeak() {
+            speakButton.visibility = if (visibleButtonCount < maxButtons && speakControl.isStopped) {
+                visibleButtonCount += 1
+                View.VISIBLE
+            } else View.GONE
+        }
 
-        bookmarkButton.visibility = if(visibleButtonCount< maxButtons) {
-            visibleButtonCount += 1
-            View.VISIBLE
-        } else View.GONE
+        fun addBookmarks() {
+            bookmarkButton.visibility = if (visibleButtonCount < maxButtons) {
+                visibleButtonCount += 1
+                View.VISIBLE
+            } else View.GONE
+        }
+
+        val speakLastUsed = preferences.getLong("speak-last-used", 0)
+        val searchLastUsed = preferences.getLong("search-last-used", 0)
+        val bookmarksLastUsed = preferences.getLong("bookmarks-last-used", 0)
+
+        val funs = arrayListOf(Pair(speakLastUsed, {addSpeak()}),
+                               Pair(searchLastUsed, {addSearch()}),
+                               Pair(bookmarksLastUsed, {addBookmarks()}))
+        funs.sortBy { -it.first }
+
+        for(p in funs) {
+            p.second()
+        }
 
         dictionaryButton.visibility = if(suggestedDictionary != null && visibleButtonCount < maxButtons) {
             dictionaryButton.text = titleSplitter.shorten(suggestedDictionary.abbreviation, actionButtonMaxChars)
@@ -443,6 +465,14 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
 
     class FullScreenEvent(val isFullScreen: Boolean)
     private var isFullScreen = false
+
+    var fullScreen
+        get() = isFullScreen
+        set(value) {
+            if(value != isFullScreen) {
+                toggleFullScreen()
+            }
+        }
 
     fun toggleFullScreen() {
         sharedActivityState.toggleFullScreen()
@@ -752,7 +782,6 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
 
     override fun onResume() {
         super.onResume()
-
         // allow webView to start monitoring tilt by setting focus which causes tilt-scroll to resume
         documentViewManager.documentView.asView().requestFocus()
     }
@@ -782,6 +811,7 @@ class MainBibleActivity : CustomTitlebarActivityBase(), VerseActionModeMediator.
         Log.d(TAG, "showVerseActionModeMenu")
 
         runOnUiThread {
+            showSystemUI()
             val actionMode = startSupportActionMode(actionModeCallbackHandler)
             // Fix for onPrepareActionMode not being called: https://code.google.com/p/android/issues/detail?id=159527
             actionMode?.invalidate()

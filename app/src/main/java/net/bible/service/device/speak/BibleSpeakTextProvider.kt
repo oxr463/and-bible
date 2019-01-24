@@ -34,6 +34,7 @@ import org.crosswire.jsword.passage.Verse
 import net.bible.android.BibleApplication
 import net.bible.android.control.bookmark.BookmarkControl
 import net.bible.android.control.event.ABEventBus
+import net.bible.android.control.event.ToastEvent
 import net.bible.android.control.page.window.WindowRepository
 import net.bible.android.control.speak.SpeakSettingsChangedEvent
 import net.bible.service.db.bookmark.BookmarkDto
@@ -155,6 +156,7 @@ class BibleSpeakTextProvider(private val swordContentFacade: SwordContentFacade,
     fun setupReading(book: SwordBook, verse: Verse) {
         reset()
         setupBook(book)
+
         currentVerse = verse
         startVerse = verse
         endVerse = verse

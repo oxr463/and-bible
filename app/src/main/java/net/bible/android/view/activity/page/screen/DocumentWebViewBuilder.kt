@@ -44,8 +44,6 @@ import net.bible.android.control.page.window.Window
 import net.bible.android.control.page.window.Window.WindowOperation
 import net.bible.android.control.page.window.WindowControl
 import net.bible.android.view.activity.MainBibleActivityScope
-import net.bible.android.view.activity.base.SharedActivityState
-import net.bible.android.view.activity.page.BibleJavascriptInterface
 import net.bible.android.view.activity.page.BibleView
 import net.bible.android.view.activity.page.BibleViewFactory
 import net.bible.android.view.activity.page.MainBibleActivity
@@ -439,7 +437,8 @@ class DocumentWebViewBuilder @Inject constructor(
     }
 
     private fun createMaximiseToggleButton(window: Window): Button {
-        val b = createImageButton(R.drawable.ic_menu_unmaximise,
+        val text = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) "⇕" else "━━"
+        val b = createTextButton(text,
                 { v -> showPopupWindow(window, v) },
                 { v -> windowControl.unmaximiseWindow(window); true}
         )
@@ -483,6 +482,7 @@ class DocumentWebViewBuilder @Inject constructor(
             height = BUTTON_SIZE_PX
             setTextColor(WINDOW_BUTTON_TEXT_COLOUR)
             setTypeface(null, Typeface.BOLD)
+            textSize = 20.0F
             setSingleLine(true)
             setOnClickListener(onClickListener)
             setOnLongClickListener(onLongClickListener)
