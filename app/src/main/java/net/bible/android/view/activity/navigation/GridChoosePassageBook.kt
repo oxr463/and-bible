@@ -65,7 +65,6 @@ class GridChoosePassageBook : CustomTitlebarActivityBase(R.menu.choose_passage_b
     private// this is used for preview
     val bibleBookButtonInfo: List<ButtonInfo>
         get() {
-            val isShortBookNamesAvailable = isShortBookNames
             val currentBibleBook = KeyUtil.getVerse(activeWindowPageManagerProvider.activeWindowPageManager.currentBible.key).book
 
             val bibleBookList = navigationControl.getBibleBooks(isCurrentlyShowingScripture)
@@ -74,7 +73,7 @@ class GridChoosePassageBook : CustomTitlebarActivityBase(R.menu.choose_passage_b
                 val buttonInfo = ButtonInfo()
                 try {
                     buttonInfo.id = book.ordinal
-                    buttonInfo.name = getShortBookName(book, isShortBookNamesAvailable)
+                    buttonInfo.name = versification.getLongName(book)
                     buttonInfo.textColor = getBookTextColor(book.ordinal)
                     buttonInfo.highlight = book == currentBibleBook
                 } catch (nsve: NoSuchVerseException) {
@@ -84,18 +83,6 @@ class GridChoosePassageBook : CustomTitlebarActivityBase(R.menu.choose_passage_b
                 keys.add(buttonInfo)
             }
             return keys
-        }
-
-    private// should never get here
-    val isShortBookNames: Boolean
-        get() {
-            return try {
-                versification.getShortName(BibleBook.GEN) != versification.getLongName(BibleBook.GEN)
-            } catch (nsve: Exception) {
-                Log.e(TAG, "No such bible book no: 1", nsve)
-                false
-            }
-
         }
 
     private val versification: Versification

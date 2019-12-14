@@ -56,11 +56,11 @@ public class LayoutDesigner {
 	private static RowColLayout BIBLE_BOOK_LAYOUT = new RowColLayout();
 	private static RowColLayout BIBLE_BOOK_LAYOUT_LAND = new RowColLayout();
 	static {
-		BIBLE_BOOK_LAYOUT.rows = 11;
-		BIBLE_BOOK_LAYOUT.cols = 6;
+		BIBLE_BOOK_LAYOUT.rows = 66;
+		BIBLE_BOOK_LAYOUT.cols = 1;
 
-		BIBLE_BOOK_LAYOUT_LAND.rows = 6;
-		BIBLE_BOOK_LAYOUT_LAND.cols = 11;
+		BIBLE_BOOK_LAYOUT_LAND.rows = 1;
+		BIBLE_BOOK_LAYOUT_LAND.cols = 66;
 	}
 	
 	RowColLayout calculateLayout(List<ButtonInfo> buttonInfoList) {
